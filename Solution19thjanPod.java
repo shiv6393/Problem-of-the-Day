@@ -1,31 +1,41 @@
 class Solution19thjanPod {
     public int maxSideLength(int[][] mat, int threshold) {
-         int m=mat.length;
-         int n=mat[0].length;
-         int[][]rowSum=new int[m][n];
-         for(int i=0;i<m;i++){
-            int preSum=0;
-            for(int j=0;j<n;j++){
-                preSum+=mat[i][j];
-                rowSum[i][j]=preSum;
-
-            }
-         }
-        int minSize=Math.min(m,n);
-        for(int size=minSize;size>=1;size--){
-            for(int i=0;i+size<=m;i++){
-                for(int j=0;j+size<=n;j++){
-                    int squareSum=0;
-                   for (int k=0; k<size;k++){
-    squareSum += rowSum[i+k][j+size-1] 
-               - (j>0 ?rowSum[i+k][j-1]:0);
-}
-
-                    if(squareSum<=threshold)return size;
-                }
+        int m = mat.length, n = mat[0].length;
+        int[][] preSum = new int[m + 1][n + 1];
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                preSum[i][j] = mat[i - 1][j - 1]
+                        + preSum[i - 1][j]
+                        + preSum[i][j - 1]
+                        - preSum[i - 1][j - 1];
             }
         }
-        return 0;
-        
+
+        int low = 0, high = Math.min(m, n);
+
+        while (low < high) {
+            int mid = (low + high + 1) / 2;
+
+            if (existsSquare(preSum, mid, threshold)) {
+                low = mid;
+            } else {
+                high = mid - 1;
+            }
+        }
+
+        return low;
+    }
+
+    private boolean existsSquare(int[][] preSum, int size, int threshold) {
+        for (int i = size; i < preSum.length; i++) {
+            for (int j = size; j < preSum[0].length; j++) {
+                int sum = preSum[i][j]
+                        - preSum[i - size][j]
+                        - preSum[i][j - size]
+                        + preSum[i - size][j - size];
+                if (sum <= threshold) return true;
+            }
+        }
+        return false;
     }
 }
